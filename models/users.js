@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
 const inboxSchema = new mongoose.Schema({
-  contactIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+  contactNames: [{ type: String }],
   chats: { type: mongoose.Schema.Types.ObjectId, ref: "messages" },
 });
 
@@ -20,6 +20,7 @@ usersSchema.methods.generateAuthToken = function () {
   );
   return token;
 };
+
 const inbox = mongoose.model("inbox", inboxSchema);
 const users = mongoose.model("users", usersSchema);
 
@@ -64,16 +65,20 @@ async function getUserById(id) {
 
 async function addChatToUsers(chatId, ids) {
   ids.forEach(async (u) => {
-    const contactIds = ids.splice(ids.indexOf(u), 1);
     const user = await getUserById(u);
+    const contactNames = [];
+    for (let index = 0; index < ids.length; index++) {
+      const contactId = ids[index];
+      const contact = await users.findById(contactId).select("username");
+      contactNames.push(contact.username);
+    }
     if (!user) return false;
     user.inbox.push(
       new inbox({
-        contactIds: contactIds,
+        contactNames: contactNames,
         chats: chatId,
       })
     );
-
     user.save();
   });
   return true;
@@ -83,4 +88,5 @@ module.exports.updateUser = updateUser;
 module.exports.getUserByName = getUserByName;
 module.exports.getUserById = getUserById;
 module.exports.addChatToUsers = addChatToUsers;
+module.exports.users = users;
 module.exports.NewUser = NewUser;
