@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 
 const inboxSchema = new mongoose.Schema({
   contactNames: [{ type: String }],
+  unreadMessages: { type: Number, default: 0 },
   chats: { type: mongoose.Schema.Types.ObjectId, ref: "messages" },
 });
 

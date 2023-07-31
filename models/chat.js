@@ -17,12 +17,16 @@ async function createNewChat(ids) {
   const newChat = new massages({
     messages: [],
     peopleInChat: ids,
+    date: new Date(),
   });
   const chat = await newChat.save();
   addChatToUsers(chat._id, ids);
+  return chat;
 }
 async function getChat(id) {
-  const chat = await massages.findById(id).populate("peopleInChat", "-_id");
+  const chat = await massages
+    .findById(id)
+    .populate("peopleInChat", " -date -password -inbox -__v");
   return chat;
 }
 
